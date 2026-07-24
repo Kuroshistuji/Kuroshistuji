@@ -32,7 +32,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # yamllint is installed on all GitHub-hosted ubuntu runners as part of
       # the default tool cache. Running it directly avoids an extra install

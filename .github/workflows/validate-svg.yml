@@ -28,7 +28,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # xmllint is available on all ubuntu-latest runners via libxml2-utils.
       # --noout    suppresses the parsed document echo (we only want errors)
