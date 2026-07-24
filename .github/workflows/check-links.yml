@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # lychee is a fast, async link checker written in Rust.
       # It natively understands Markdown and extracts all URLs automatically.

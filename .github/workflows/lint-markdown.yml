@@ -31,14 +31,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # markdownlint-cli2 is the modern CLI for the markdownlint library.
       # It reads .markdownlint.yaml automatically from the repository root.
       # The glob pattern "**/*.md" matches README.md and CONTRIBUTING.md.
       # "#node_modules" excludes any future vendored dependencies.
       - name: Run markdownlint
-        uses: DavidAnson/markdownlint-cli2-action@v16
+        uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           globs: |
             **/*.md
