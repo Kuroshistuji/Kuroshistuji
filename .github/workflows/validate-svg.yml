@@ -1,0 +1,86 @@
+name: Validate SVG
+
+# Runs on every push and pull request that touches the banner SVG.
+# Also available via manual dispatch.
+on:
+  push:
+    paths:
+      - "assets/**.svg"
+  pull_request:
+    paths:
+      - "assets/**.svg"
+  workflow_dispatch:
+
+# Cancel any in-progress run for the same branch when a newer push arrives.
+concurrency:
+  group: validate-svg-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: SVG validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    # Read-only — this workflow never writes back to the repository.
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # xmllint is available on all ubuntu-latest runners via libxml2-utils.
+      # --noout    suppresses the parsed document echo (we only want errors)
+      # --nowarns  suppresses non-fatal warnings so output is signal-only
+      # The exit code is non-zero if the file is not well-formed XML, which
+      # causes the step — and therefore the job — to fail.
+      - name: Check SVG is well-formed XML
+        run: |
+          echo "Validating assets/banner.svg..."
+          xmllint --noout --nowarns assets/banner.svg
+          echo "Well-formedness check passed."
+
+      # SVGs can reference external resources (fonts, images, scripts) via
+      # xlink:href, href, src, or url() in inline styles. An SVG that loads
+      # external content breaks in privacy-restricted environments and adds
+      # an unnecessary external dependency to a self-contained asset.
+      #
+      # This step scans for the five most common external-reference patterns.
+      # It exits 0 (pass) only if none are found. If any are found, it prints
+      # the offending lines and exits 1 (fail).
+      - name: Check for external resource references
+        run: |
+          echo "Scanning assets/banner.svg for external references..."
+
+          found=0
+
+          check() {
+            local pattern="$1"
+            local label="$2"
+            if grep -nEi "$pattern" assets/banner.svg; then
+              echo "FAIL: external reference found — $label"
+              found=1
+            fi
+          }
+
+          # xlink:href or href pointing to http/https
+          check 'href\s*=\s*"https?://' "href to external URL"
+
+          # url() referencing an http/https resource (common in inline styles)
+          check "url\(https?://" "url() with external URL"
+
+          # Base64-embedded data URIs (can carry arbitrary payloads)
+          check 'data:[^;]+;base64,' "base64 data URI"
+
+          # <script> elements (legitimate in SVG but not expected here)
+          check '<script' "<script> element"
+
+          # <image> with an external src
+          check '<image[^>]+href\s*=\s*"https?://' "<image> with external href"
+
+          if [ "$found" -eq 0 ]; then
+            echo "No external references found. Check passed."
+          else
+            exit 1
+          fi

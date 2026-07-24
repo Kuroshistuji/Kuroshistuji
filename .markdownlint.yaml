@@ -1,0 +1,54 @@
+# markdownlint configuration
+# Docs: https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+#
+# This file governs both the lint-markdown workflow and any editor integration
+# (e.g. the VS Code markdownlint extension picks this up automatically).
+
+default: true
+
+# MD013 — Line length
+# GitHub profile READMEs use inline HTML for layout, which produces lines that
+# are intentionally long (badge URLs, SVG srcs, table cells). Disabling this
+# rule entirely is cleaner than setting an arbitrarily high limit.
+MD013: false
+
+# MD033 — Inline HTML
+# This repository deliberately uses inline HTML for centred layouts, tables,
+# and picture elements. Disabling prevents false positives on intentional HTML.
+MD033: false
+
+# MD041 — First line should be a top-level heading
+# README.md opens with a centred <div> block, not an H1. The visual heading is
+# inside the SVG banner. Disabling avoids a false positive on the profile page.
+MD041: false
+
+# MD036 — Emphasis used instead of a heading
+# Project cards in the Featured Projects section use bold text as visual titles
+# rather than H3/H4 headings, which keeps the spacing tighter on mobile.
+MD036: false
+
+# MD026 — Trailing punctuation in headings
+# No changes to default (true). All headings should be punctuation-free.
+
+# MD022 — Headings should be surrounded by blank lines
+# No changes to default (true).
+
+# MD024 — Multiple headings with the same content
+# Disabled because CONTRIBUTING.md and README.md are separate files;
+# the linter runs across both and would flag identical section names.
+MD024: false
+
+# MD046 — Code block style
+# Enforce fenced code blocks (``` style) consistently.
+MD046:
+  style: fenced
+
+# MD049 — Emphasis style
+# Enforce asterisks (*) over underscores for consistency.
+MD049:
+  style: asterisk
+
+# MD050 — Strong style
+# Enforce double asterisks (**) over underscores for consistency.
+MD050:
+  style: asterisk

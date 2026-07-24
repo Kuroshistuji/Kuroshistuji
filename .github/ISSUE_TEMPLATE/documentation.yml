@@ -1,0 +1,48 @@
+name: Documentation Issue
+description: Report incorrect, unclear, or missing documentation
+title: "[Docs]: "
+labels: ["documentation", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for helping improve the documentation. Please describe the issue below.
+
+  - type: dropdown
+    id: issue-type
+    attributes:
+      label: Issue type
+      description: What kind of documentation issue is this?
+      options:
+        - Incorrect information
+        - Unclear or confusing
+        - Missing documentation
+        - Typo or formatting
+        - Outdated content
+    validations:
+      required: true
+
+  - type: input
+    id: location
+    attributes:
+      label: Location
+      description: Where is the issue? Provide a file path or URL.
+      placeholder: "README.md line 42, or https://github.com/org/repo/blob/main/docs/guide.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Explain the issue. What is wrong or missing?
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: Suggested fix
+      description: If you know how to fix it, describe or provide the corrected text.
+    validations:
+      required: false

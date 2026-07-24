@@ -1,0 +1,76 @@
+name: Generate Contribution Snake
+
+# Triggers:
+#   - Daily at midnight UTC (keeps the animation current)
+#   - Manual dispatch from the Actions tab (useful after a long gap in contributions)
+#   - Every push to main (regenerates immediately when the profile is updated)
+on:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+# Prevent parallel runs from the same trigger source.
+# If a scheduled run and a push overlap, the in-progress job is cancelled
+# and the newer one proceeds — avoiding a race condition on the output branch.
+concurrency:
+  group: snake-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate Snake Animation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Explicit minimum permissions — contents:write is required to push
+    # the generated SVGs to the output branch. No other permissions needed.
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Reads the contribution graph for the repository owner and produces
+      # two animated SVG files written to ./dist/:
+      #
+      #   github-contribution-grid-snake.svg
+      #     Standard palette — renders correctly on GitHub light mode.
+      #
+      #   github-contribution-grid-snake-dark.svg
+      #     github-dark palette — renders correctly on GitHub dark mode.
+      #
+      # The README uses a <picture> element to serve the correct variant
+      # based on the visitor's colour scheme preference.
+      - name: Generate snake SVGs
+        uses: Platane/snk@v3
+        with:
+          github_user_name: ${{ github.repository_owner }}
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+
+      # Pushes ./dist/ to the `output` branch as an orphan commit.
+      #
+      # force_orphan: true replaces the branch history on every run rather
+      # than appending to it, preventing the output branch from accumulating
+      # unbounded git history over time.
+      #
+      # The README references the raw files at:
+      #   https://raw.githubusercontent.com/Kuroshitsuji/Kuroshitsuji/output/github-contribution-grid-snake-dark.svg
+      #   https://raw.githubusercontent.com/Kuroshitsuji/Kuroshitsuji/output/github-contribution-grid-snake.svg
+      #
+      # NOTE: peaceiris/actions-gh-pages@v4 currently targets Node.js 20.
+      # GitHub Actions will log a deprecation warning about Node.js 20 until
+      # the maintainer releases a Node.js 24-compatible version. The workflow
+      # functions correctly despite this warning.
+      - name: Push SVGs to output branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: output
+          publish_dir: ./dist
+          force_orphan: true

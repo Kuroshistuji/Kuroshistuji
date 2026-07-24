@@ -1,0 +1,67 @@
+# yamllint configuration
+# Docs: https://yamllint.readthedocs.io/en/stable/rules.html
+#
+# Scoped to the YAML files in this repository:
+#   .github/workflows/snake.yml
+#   .github/workflows/lint-markdown.yml
+#   .github/workflows/lint-yaml.yml
+#   .github/workflows/validate-svg.yml
+#   .github/workflows/check-links.yml
+#   .github/dependabot.yml
+#   .markdownlint.yaml
+#   .yamllint.yaml
+
+extends: default
+
+rules:
+
+  # Line length — GitHub Actions workflow steps with long `uses:` strings or
+  # multiline `outputs:` blocks regularly exceed 80 characters. 120 is a
+  # practical limit that catches genuinely unreadable lines without false
+  # positives on normal workflow syntax.
+  line-length:
+    max: 120
+    level: warning
+
+  # Comments — require a single space after `#` for readability.
+  # Allow shebangs (though none exist here) and top-of-file markers.
+  comments:
+    min-spaces-from-content: 1
+
+  # Comments indentation — yamllint's default requires comments to align with
+  # the block they annotate. GitHub Actions files use inline step comments that
+  # sit above the key they describe, which is correct style. Default is fine.
+  comments-indentation: enable
+
+  # Truthy — YAML accepts `yes`, `no`, `on`, `off` as booleans, which causes
+  # hard-to-debug surprises. Enforcing explicit `true`/`false` avoids this.
+  # The `on:` workflow trigger key is a known GitHub Actions exception and is
+  # handled by yamllint's built-in allowed-values list.
+  truthy:
+    allowed-values:
+      - "true"
+      - "false"
+    check-keys: false
+
+  # Braces — allow inline mappings for short single-key objects.
+  braces:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Brackets — allow compact inline sequences.
+  brackets:
+    min-spaces-inside: 0
+    max-spaces-inside: 1
+
+  # Indentation — enforce 2-space indentation, consistent with all files in
+  # this repository.
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # New line at end of file — enforced for clean diffs.
+  new-line-at-end-of-file: enable
+
+  # Trailing spaces — enforced.
+  trailing-spaces: enable

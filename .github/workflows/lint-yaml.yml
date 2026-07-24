@@ -1,0 +1,45 @@
+name: Lint YAML
+
+# Runs on every push and pull request that touches a YAML file or the
+# yamllint config. Also available via manual dispatch.
+on:
+  push:
+    paths:
+      - "**.yml"
+      - "**.yaml"
+      - ".yamllint.yaml"
+  pull_request:
+    paths:
+      - "**.yml"
+      - "**.yaml"
+      - ".yamllint.yaml"
+  workflow_dispatch:
+
+# Cancel any in-progress run for the same branch when a newer push arrives.
+concurrency:
+  group: lint-yaml-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    # Read-only — this workflow never writes back to the repository.
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # yamllint is installed on all GitHub-hosted ubuntu runners as part of
+      # the default tool cache. Running it directly avoids an extra install
+      # step and keeps this job fast.
+      #
+      # -c .yamllint.yaml  — use the repository's explicit config
+      # -f github          — emits annotations visible inline on the PR diff
+      # .                  — lint every YAML file in the repository tree
+      - name: Run yamllint
+        run: yamllint -c .yamllint.yaml -f github .
